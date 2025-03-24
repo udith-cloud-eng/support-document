@@ -3,106 +3,1131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Galactic Odyssey | Interactive Universe Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            cursor: none;
+        }
+        
+        body {
+            overflow-x: hidden;
+            background-color: #000;
+            color: #fff;
+            perspective: 1000px;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+        
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(79, 172, 254, 0.8) 0%, rgba(0, 242, 254, 0.4) 70%, transparent 100%);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.8);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(79, 172, 254, 0.3);
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .galaxy-spinner {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background: url('/api/placeholder/1000/1000') no-repeat center center;
+            background-size: contain;
+            opacity: 0.2;
+            animation: spin 120s linear infinite;
+            pointer-events: none;
+        }
+        
+        h1 {
+            font-size: 5vw;
+            letter-spacing: 0.5vw;
+            margin-bottom: 2vh;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: glow 3s infinite alternate;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .glitch-effect {
+            position: relative;
+            animation: glitch 5s infinite;
+        }
+        
+        .subtitle {
+            font-size: 1.5vw;
+            opacity: 0.8;
+            max-width: 80%;
+            margin-bottom: 5vh;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .scroll-prompt {
+            position: absolute;
+            bottom: 5vh;
+            font-size: 1rem;
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+            z-index: 2;
+        }
+        
+        section {
+            min-height: 100vh;
+            padding: 15vh 5vw;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .orbital-path {
+            position: absolute;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+            z-index: -1;
+        }
+        
+        .section-title {
+            font-size: 3vw;
+            margin-bottom: 5vh;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1vh;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4facfe, transparent);
+        }
+        
+        .content-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .text-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 2rem;
+            background: rgba(0, 10, 30, 0.7);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+            margin: 1rem;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .text-box:hover {
+            box-shadow: 0 0 40px rgba(79, 172, 254, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .text-box p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .image-container {
+            flex: 1;
+            min-width: 300px;
+            margin: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+            transform: perspective(1000px) rotateY(5deg);
+            transition: transform 0.5s ease;
+            position: relative;
+        }
+        
+        .image-container:hover {
+            transform: perspective(1000px) rotateY(0deg);
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .hologram-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 0%, rgba(79, 172, 254, 0.1) 50%, transparent 100%);
+            animation: hologram-scan 3s linear infinite;
+            pointer-events: none;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            width: 100%;
+            margin: 5vh 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-box {
+            text-align: center;
+            margin: 2vh 1vw;
+            padding: 2rem;
+            background: rgba(0, 10, 30, 0.7);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+        
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1vh;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .planet-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            height: 400px;
+            margin: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            z-index: 2;
+        }
+        
+        .planet-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 0 40px rgba(79, 172, 254, 0.6);
+        }
+        
+        .planet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 70%, rgba(0, 10, 30, 0.8) 100%);
+            z-index: 1;
+        }
+        
+        .planet-card img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+            transition: transform 10s linear;
+        }
+        
+        .planet-card:hover img {
+            transform: scale(1.1);
+        }
+        
+        .planet-info {
+            padding: 1rem;
+            background: rgba(0, 10, 30, 0.8);
+            height: 30%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .planet-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 10vh 5vw;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 3vh;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: calc(100% + 20px);
+            background: radial-gradient(circle, rgba(79, 172, 254, 0.8) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.4);
+        }
+        
+        .cta-button:hover::before {
+            opacity: 1;
+        }
+        
+        footer {
+            background: rgba(0, 10, 30, 0.8);
+            padding: 5vh 5vw;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3vh;
+        }
+        
+        .footer-links a {
+            color: #fff;
+            margin: 0 1rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+        }
+        
+        .copyright {
+            opacity: 0.5;
+            font-size: 0.8rem;
+        }
+        
+        .video-container {
+            width: 80%;
+            max-width: 1000px;
+            margin: 5vh auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+            position: relative;
+        }
+        
+        .video-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        .ufo {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: radial-gradient(ellipse at center, rgba(120, 220, 255, 0.8) 0%, rgba(0, 200, 255, 0.4) 70%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.8);
+            z-index: 10;
+            transform-style: preserve-3d;
+        }
+        
+        .ufo::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 15px;
+            width: 30px;
+            height: 15px;
+            background: rgba(100, 100, 120, 0.7);
+            border-radius: 50% 50% 0 0;
+            transform: rotateX(60deg);
+        }
+        
+        .ufo-beam {
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            width: 20px;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(79, 172, 254, 0.8), transparent);
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+            opacity: 0.5;
+            animation: beam-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .comet {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+        
+        .comet::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.7), transparent);
+            transform: translateX(-100px);
+        }
+        
+        .hidden-constellation {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 1;
+        }
+        
+        .hidden-constellation.visible {
+            opacity: 1;
+        }
+        
+        .constellation-dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        
+        .constellation-line {
+            position: absolute;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            transform-origin: 0 0;
+        }
+        
+        @keyframes hologram-scan {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(79, 172, 254, 0.8), 0 0 40px rgba(79, 172, 254, 0.4);
+            }
+        }
+        
+        @keyframes glitch {
+            0%, 100% {
+                transform: translate(0);
+                text-shadow: 0 0 10px rgba(79, 172, 254, 0.8);
+            }
+            92% {
+                transform: translate(5px, -5px);
+                text-shadow: -3px 0 #ff00de;
+            }
+            93% {
+                transform: translate(-5px, 5px);
+                text-shadow: 3px 0 #00fff9;
+            }
+            94% {
+                transform: translate(5px, 5px);
+                text-shadow: 3px 0 #ff00de, -3px 0 #00fff9;
+            }
+            95% {
+                transform: translate(-5px, -5px);
+                text-shadow: -3px 0 #ff00de, 3px 0 #00fff9;
+            }
+            96%, 98% {
+                transform: translate(0);
+                text-shadow: none;
+            }
+            97% {
+                transform: translate(3px, 3px);
+                text-shadow: 1px 0 #00fff9, -1px 0 #ff00de;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        @keyframes beam-pulse {
+            0% {
+                opacity: 0.3;
+                height: 80px;
+            }
+            100% {
+                opacity: 0.6;
+                height: 120px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 8vw;
+            }
+            
+            .subtitle {
+                font-size: 4vw;
+            }
+            
+            .section-title {
+                font-size: 6vw;
+            }
+            
+            .image-container, .text-box {
+                min-width: 100%;
+            }
+            
+            .custom-cursor, .cursor-trail {
+                display: none;
+            }
+            
+            * {
+                cursor: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <form class="login-form">
-            <h2>Login</h2>
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Enter your email" required>
+    <div class="custom-cursor"></div>
+    <div id="canvas-container"></div>
+    
+    <header>
+        <div class="galaxy-spinner"></div>
+        <h1 class="glitch-effect">GALACTIC ODYSSEY</h1>
+        <p class="subtitle">Explore the wonders and mysteries of the cosmos in this immersive journey through space-time</p>
+        <div class="scroll-prompt">Scroll to begin your cosmic adventure</div>
+    </header>
+    
+    <section id="intro">
+        <div class="orbital-path" style="width: 300px; height: 300px; top: 20%; left: 70%;"></div>
+        <div class="orbital-path" style="width: 500px; height: 500px; top: 10%; left: 60%;"></div>
+        <div class="planet" style="width: 20px; height: 20px; background: radial-gradient(circle, #4facfe, #0070e0); top: 20%; left: 70%;"></div>
+        
+        <h2 class="section-title">The Cosmic Frontier</h2>
+        <div class="content-container">
+            <div class="text-box">
+                <p>For millennia, humans have gazed at the stars with wonder and curiosity. What lies beyond our atmosphere? What secrets does the cosmos hold? Today, we stand at the precipice of a new era of space exploration.</p>
+                <p>Recent technological advancements have opened doors to destinations once thought unreachable. From reusable rockets to advanced propulsion systems, we're pushing the boundaries of what's possible.</p>
+                <p>Join us on this cosmic journey as we explore the most fascinating discoveries, upcoming missions, and the future of humanity among the stars.</p>
             </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required>
+            <div class="image-container">
+                <img src="/media/Chrysanthemum.jpg" alt="Space exploration image">
+                <div class="hologram-effect"></div>
             </div>
-            <button type="submit">Login</button>
-            <p class="register-link">Don't have an account? <a href="#">Register</a></p>
-        </form>
+        </div>
+    </section>
+    
+    <section id="discoveries">
+        <div class="orbital-path" style="width: 400px; height: 400px; top: 30%; left: 20%;"></div>
+        <div class="planet" style="width: 30px; height: 30px; background: radial-gradient(circle, #ff9d00, #ff6000); top: 30%; left: 20%;"></div>
+        
+        <h2 class="section-title">Cosmic Discoveries</h2>
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-number">5,000+</div>
+                <p>Exoplanets discovered</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">100+</div>
+                <p>Potentially habitable worlds</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">13.8B</div>
+                <p>Years since the Big Bang</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">2T+</div>
+                <p>Galaxies in the observable universe</p>
+            </div>
+        </div>
+        <div class="video-container">
+            <img src="/media/Desert.jpg" alt="Space animation placeholder">
+        </div>
+    </section>
+    
+    <section id="planets">
+        <div class="orbital-path" style="width: 600px; height: 600px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+        <div class="orbital-path" style="width: 400px; height: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+        <div class="orbital-path" style="width: 200px; height: 200px; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+        
+        <h2 class="section-title">Fascinating Worlds</h2>
+        <div class="content-container">
+            <div class="planet-card">
+                <img src="/media/Desert.jpg" alt="Mars">
+                <div class="planet-info">
+                    <h3 class="planet-name">Mars</h3>
+                    <p>The Red Planet, our next frontier for human exploration</p>
+                </div>
+            </div>
+            <div class="planet-card">
+                <img src="/media/Hydrangeas.jpg" alt="Europa">
+                <div class="planet-info">
+                    <h3 class="planet-name">Europa</h3>
+                    <p>Jupiter's moon with a subsurface ocean that could harbor life</p>
+                </div>
+            </div>
+            <div class="planet-card">
+                <img src="/media/Koala.jpg" alt="Trappist-1e">
+                <div class="planet-info">
+                    <h3 class="planet-name">Trappist-1e</h3>
+                    <p>An Earth-sized exoplanet in the habitable zone</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="future">
+        <div class="orbital-path" style="width: 500px; height: 500px; top: 40%; left: 30%;"></div>
+        <div class="planet" style="width: 40px; height: 40px; background: radial-gradient(circle, #9d00ff, #6000ff); top: 40%; left: 30%;"></div>
+        
+        <h2 class="section-title">The Future of Cosmic Exploration</h2>
+        <div class="content-container">
+            <div class="image-container">
+                <img src="/media/Jellyfish.jpg" alt="Future space technology">
+                <div class="hologram-effect"></div>
+            </div>
+            <div class="text-box">
+                <p>The next decade promises unprecedented advancements in our journey to the stars. With NASA's Artemis program, humans will return to the Moon and establish a sustainable presence.</p>
+                <p>Private companies are revolutionizing access to space, with plans for orbital hotels, asteroid mining, and even cities on Mars. The space economy is projected to reach $1 trillion by 2040.</p>
+                <p>New telescopes like the James Webb are peering deeper into the cosmos than ever before, potentially answering the age-old question: are we alone in the universe?</p>
+            </div>
+        </div>
+        <div class="cta-section">
+            <h3>Ready to join the cosmic adventure?</h3>
+            <a href="#" class="cta-button">Begin Your Journey</a>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="footer-links">
+            <a href="#">About</a>
+            <a href="#">Missions</a>
+            <a href="#">Gallery</a>
+            <a href="#">News</a>
+            <a href="#">Contact</a>
+        </div>
+        <p class="copyright">© 2025 Galactic Odyssey. All rights reserved.</p>
+    </footer>
+
+    <div class="hidden-constellation" id="constellation-1">
+        <!-- Constellation elements will be added by JS -->
     </div>
+    
+    <script>
+        // Three.js Space Scene
+        let scene, camera, renderer;
+        let stars = [];
+        let planets = [];
+        let solarSystem;
+        let mouseX = 0, mouseY = 0;
+        let cursorTrails = [];
+        let ufos = [];
+        let comets = [];
+        
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // Create stars with different colors and sizes
+            const starGeometry = new THREE.SphereGeometry(0.1, 24, 24);
+            
+            const starColors = [
+                0xffffff, // white
+                0xffffed, // warm white
+                0xeeeeff, // cool white
+                0xffdddd, // red tint
+                0xddffdd, // green tint
+                0xddddff  // blue tint
+            ];
+            
+            for (let i = 0; i < 2000; i++) {
+                const starMaterial = new THREE.MeshBasicMaterial({ 
+                    color: starColors[Math.floor(Math.random() * starColors.length)],
+                    transparent: true,
+                    opacity: Math.random() * 0.5 + 0.5
+                });
+                
+                const star = new THREE.Mesh(starGeometry, starMaterial);
+                
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                
+                star.position.set(x, y, z);
+                star.scale.x = star.scale.y = star.scale.z = Math.random() * 3;
+                star.userData = { 
+                    twinkleSpeed: Math.random() * 0.1,
+                    twinkleRange: Math.random() * 0.5 + 0.5
+                };
+                
+                scene.add(star);
+                stars.push(star);
+            }
+            
+            // Create a Solar System
+            solarSystem = new THREE.Object3D();
+            scene.add(solarSystem);
+            
+            // Sun
+            const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+            const sunMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffaa00,
+                transparent: true,
+                opacity: 0.9
+            });
+            const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            solarSystem.add(sun);
+            
+            // Sun glow
+            const sunGlowGeometry = new THREE.SphereGeometry(7, 32, 32);
+            const sunGlowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffaa00,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.BackSide
+            });
+            const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+            sun.add(sunGlow);
+            
+            // Create planets
+            const planetColors = [
+                0x3388ff, // blue
+                0xff8800, // orange
+                0x00aaff, // light blue
+                0xaa0000, // red
+                0x00aa00, // green
+                0xaa00aa  // purple
+            ];
+            
+            for (let i = 0; i < 6; i++) {
+                const distance = 10 + i * 8;
+                const speed = 0.01 / (i * 0.2 + 1);
+                const size = Math.random() * 1.5 + 0.5;
+                
+                const planetOrbit = new THREE.Object3D();
+                planetOrbit.rotation.x = Math.random() * Math.PI / 4;
+                planetOrbit.rotation.y = Math.random() * Math.PI / 4;
+                solarSystem.add(planetOrbit);
+                
+                const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
+                const planetMaterial = new THREE.MeshBasicMaterial({ color: planetColors[i] });
+                const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+                planet.position.x = distance;
+                planetOrbit.add(planet);
+                
+                // Create orbit line
+                const orbitGeometry = new THREE.RingGeometry(distance - 0.1, distance + 0.1, 64);
+                const orbitMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x444466,
+                    transparent: true,
+                    opacity: 0.2,
+                    side: THREE.DoubleSide
+                });
+                const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+                orbit.rotation.x = Math.PI / 2;
+                solarSystem.add(orbit);
+                
+                planets.push({ 
+                    planet: planet, 
+                    orbit: planetOrbit, 
+                    speed: speed,
+                    distance: distance
+                });
+            }
+            
+            // Add comets
+            for (let i = 0; i < 5; i++) {
+                createComet();
+            }
+            
+            // Add UFOs
+            for (let i = 0; i < 3; i++) {
+                createUFO();
+            }
+            
+            // Window resize handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Mouse move handler for parallax effect
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = (event.clientY / window.innerHeight) * 2 - 1;
+                
+                // Update custom cursor
+                const cursor = document.querySelector('.custom-cursor');
+                cursor.style.left = `${event.clientX}px`;
+                cursor.style.top = `${event.clientY}px`;
+                
+                // Create cursor trail
+                const trail = document.createElement('div');
+                trail.classList.add('cursor-trail');
+                trail.style.left = `${event.clientX}px`;
+                trail.style.top = `${event.clientY}px`;
+                document.body.appendChild(trail);
+                
+                // Animate and remove trail
+                setTimeout(() => {
+                    trail.style.width = '0';
+                    trail.style.height = '0';
+                    trail.style.opacity = '0';
+                    setTimeout(() => {
+                        trail.remove();
+                    }, 200);
+                }, 10);
+            });
+            
+            // Scroll animations
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                
+                // Animate stat boxes
+                const statBoxes = document.querySelectorAll('.stat-box');
+                statBoxes.forEach((box, index) => {
+                    const boxTop = box.getBoundingClientRect().top;
+                    if (boxTop < window.innerHeight * 0.8) {
+                        setTimeout(() => {
+                            box.style.transform = 'translateY(0)';
+                            box.style.opacity = '1';
+                        }, index * 100);
+                    }
+                });
+                
+                // Adjust camera based on scroll
+                camera.position.y = -(scrollY * 0.01);
+                solarSystem.rotation.y = scrollY * 0.001;
+                
+                // Reveal hidden constellations
+                const constellations = document.querySelectorAll('.hidden-constellation');
+                constellations.forEach(constellation => {
+                    const constTop = constellation.getBoundingClientRect().top;
+                    if (constTop < window.innerHeight * 0.7) {
+                        constellation.classList.add('visible');
+                    }
+                });
+            });
+            
+            // Create random constellations
+            createConstellation('constellation-1', 5, 150, 150, 200, 200);
+            
+            animate();
+        }
+        
+        function createComet() {
+            const comet = document.createElement('div');
+            comet.classList.add('comet');
+            
+            // Set random position and direction
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+            comet.style.left = `${startX}px`;
+            comet.style.top = `${startY}px`;
+            
+            // Random speed and angle
+            const speed = Math.random() * 5 + 3;
+            const angle = Math.random() * Math.PI * 2;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            
+            document.body.appendChild(comet);
+            comets.push({ element: comet, x: startX, y: startY, vx: vx, vy: vy });
+            
+            // Remove after some time
+            setTimeout(() => {
+                comet.remove();
+                comets = comets.filter(c => c.element !== comet);
+            }, 10000);
+        }
+        
+        function createUFO() {
+            const ufo = document.createElement('div');
+            ufo.classList.add('ufo');
+            
+            const beam = document.createElement('div');
+            beam.classList.add('ufo-beam');
+            ufo.appendChild(beam);
+            
+            // Random position
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight * 0.5;
+            ufo.style.left = `${x}px`;
+            ufo.style.top = `${y}px`;
+            
+            // Random speed
+            const speed = Math.random() * 2 + 1;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            
+            document.body.appendChild(ufo);
+            ufos.push({ element: ufo, x: x, y: y, speed: speed * direction });
+            
+            // Remove after some time
+            setTimeout(() => {
+                ufo.remove();
+                ufos = ufos.filter(u => u.element !== ufo);
+                // Create a new one
+                createUFO();
+            }, 20000);
+        }
+        
+        function createConstellation(id, numStars, minX, minY, maxX, maxY) {
+            const constellation = document.getElementById(id);
+            
+            const stars = [];
+            // Create stars
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('constellation-dot');
+                
+                const x = minX + Math.random() * (maxX - minX);
+                const y = minY + Math.random() * (maxY - minY);
+                
+                star.style.left = `${x}px`;
+                star.style.top = `${y}px`;
+                
+                constellation.appendChild(star);
+                stars.push({ element: star, x: x, y: y });
+            }
+            
+            // Create lines between stars
+            for (let i = 0; i < stars.length - 1; i++) {
+                const line = document.createElement('div');
+                line.classList.add('constellation-line');
+                
+                const star1 = stars[i];
+                const star2 = stars[i + 1];
+                
+                const dx = star2.x - star1.x;
+                const dy = star2.y - star1.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                line.style.width = `${length}px`;
+                line.style.left = `${star1.x}px`;
+                line.style.top = `${star1.y}px`;
+                line.style.transform = `rotate(${angle}rad)`;
+                
+                constellation.appendChild(line);
+            }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate solar system
+            solarSystem.rotation.y += 0.001;
+            
+            // Animate planets
+            planets.forEach(p => {
+                p.orbit.rotation.y += p.speed;
+            });
+            
+            // Twinkle stars
+            stars.forEach(star => {
+                const time = Date.now() * star.userData.twinkleSpeed;
+                const scale = star.userData.twinkleRange + Math.sin(time) * 0.2;
+                star.scale.set(scale, scale, scale);
+            });
+            
+            // Move camera slightly based on mouse position for parallax effect
+            camera.position.x += (mouseX * 10 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 10 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            
+            // Update UFOs
+            ufos.forEach(ufo => {
+                ufo.x += ufo.speed;
+                ufo.element.style.left = `${ufo.x}px`;
+                
+                // Wrap around screen
+                if (ufo.x > window.innerWidth + 100) {
+                    ufo.x = -100;
+                } else if (ufo.x < -100) {
+                    ufo.x = window.innerWidth + 100;
+                }
+            });
+            
+            // Update comets
+            comets.forEach(comet => {
+                comet.x += comet.vx;
+                comet.y += comet.vy;
+                comet.element.style.left = `${comet.x}px`;
+                comet.element.style.top = `${comet.y}px`;
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+        
+        // Interactive planets
+        document.querySelectorAll('.planet-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const deltaX = (x - centerX) / centerX;
+                const deltaY = (y - centerY) / centerY;
+                
+                card.style.transform = `translateY(-10px) scale(1.03) rotateX(${deltaY * -10}deg) rotateY(${deltaX * 10}deg)`;
+                
+                const image = card.querySelector('img');
+                image.style.transform = `scale(1.1) translateX(${deltaX * -10}px) translateY(${deltaY * -10}px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+                const image = card.querySelector('img');
+                image.style.transform = '';
+            });
+        });
+    </script>
 </body>
 </html>
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
-
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: red;
-    }
-
-    .login-container {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .login-form h2 {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        color: #333;
-    }
-
-    .input-group {
-        margin-bottom: 1rem;
-    }
-
-    .input-group label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        color: #555;
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1rem;
-    }
-
-    button {
-        width: 100%;
-        padding: 10px;
-        background: pink;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    button:hover {
-        background: #00c6fb;
-    }
-
-    .register-link {
-        text-align: center;
-        margin-top: 1rem;
-    }
-
-    .register-link a {
-        color: #4facfe;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .register-link a:hover {
-        text-decoration: underline;
-    }
-</style>
