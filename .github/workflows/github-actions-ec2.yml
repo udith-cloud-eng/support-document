@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 on master branch push
+    name: Deploy to EC2 on main branch push
     runs-on: ubuntu-latest
 
     steps:
@@ -35,4 +35,12 @@ jobs:
             sudo systemctl start apache2
             sudo systemctl enable apache2
             cd home
-            sudo mv * /var/www/html
+            sudo mv * /var/www/html/ || true
+            
+            # If media directory exists and has contents, show a message
+            if [ -d "/var/www/html/media" ] && [ -n "$(ls -A /var/www/html/media)" ]; then
+              echo "Media directory already contains files. Skipping overwrite."
+            fi
+            
+            # Restart Apache
+            sudo systemctl restart apache2
