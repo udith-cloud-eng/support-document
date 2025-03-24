@@ -1,6 +1,5 @@
 name: Push-to-EC2
 
-# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -12,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the files
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Deploy to Server 1
@@ -24,9 +23,8 @@ jobs:
           TARGET: ${{ secrets.TARGET_DIR }}
           REMOTE_PORT: 22
           ARGS: -rlgoDzvc -i
-          SSH_CMD_ARGS: -o StrictHostKeyChecking=no
 
-      - name: Executing remote ssh commands using ssh key
+      - name: Execute remote SSH commands
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
