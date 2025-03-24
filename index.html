@@ -1,48 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Documents</title>
-    <Div>
-        <H1>Hello testing </H1>
-    </Div>
-    <div>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda non rerum sunt ipsum distinctio autem
-            saepe debitis iure in eveniet. Aperiam assumenda voluptatibus ipsa? Iusto maxime alias porro laborum ex
-            officiis consequuntur, quisquam placeat? Facere, voluptates veritatis tempora, corporis illo id est, eaque
-            corrupti voluptatum architecto consectetur. Iusto, consectetur saepe modi, earum incidunt id unde quod atque
-            possimus fuga aspernatur ratione necessitatibus quasi repudiandae. Repellat expedita omnis tempora quam
-            totam labore iure libero suscipit saepe, laudantium cum natus mollitia consectetur numquam vel, veniam
-            voluptates porro sunt facere error, amet quos! Rem sint enim deleniti nobis repellat vero. Cupiditate,
-            cumque dolores! </p>
-    </div>
-
-    <div>
-        <h2>Hello this is the sample webpage </h2>
-    </div>
-
-    <span>
-        <p style="color:red;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque alias sed architecto rerum eum quo. Animi
-            architecto voluptatum dolor aut error porro. Expedita sequi optio deserunt cum voluptatem enim, consequuntur
-            facilis, quos eligendi repudiandae illo ipsam. Vero commodi quo, aliquam architecto sunt eaque quam suscipit
-            nesciunt deleniti necessitatibus officiis nobis!</p>
-    </span>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-
+    <div class="login-container">
+        <form class="login-form">
+            <h2>Login</h2>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p class="register-link">Don't have an account? <a href="#">Register</a></p>
+        </form>
+    </div>
 </body>
-
-
-
 </html>
 
 <style>
-    .p {
-        color: brown;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to right, #4facfe, #00f2fe);
+    }
+
+    .login-container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .login-form h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .input-group {
+        margin-bottom: 1rem;
+    }
+
+    .input-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #4facfe;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00c6fb;
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .register-link a {
+        color: #4facfe;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
     }
 </style>
